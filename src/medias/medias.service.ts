@@ -54,9 +54,46 @@ export class MediasService {
   }
 
   // Método para atualizar uma mídia por ID
-  update(id: number, updateMediaDto: UpdateMediaDto) {
-    return `This action updates a #${id} media`;
+  async update(id: number, updateMediaDto: UpdateMediaDto): Promise<Media> {
+    const { title, username } = updateMediaDto;
+
+    // Busca a mídia existente com o ID fornecido
+    const existingMedia = await this.mediaRepository.findOne({
+      where: { id },
+    });
+
+    if (!existingMedia) {
+      throw new HttpException('Media not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Verifica se há atualização no título e se não viola regra de unicidade
+    if (title && title !== existingMedia.title) {
+      const mediaWithTitle = await this.mediaRepository.findOne({
+        where: { title },
+      });
+      if (mediaWithTitle) {
+        throw new HttpException('Media title already exists', HttpStatus.CONFLICT);
+      }
+    }
+
+    // Verifica se há atualização no nome de usuário e se não viola regra de unicidade
+    if (username && username !== existingMedia.username) {
+      const mediaWithUsername = await this.mediaRepository.findOne({
+        where: { username },
+      });
+      if (mediaWithUsername) {
+        throw new HttpException('Media username already exists', HttpStatus.CONFLICT);
+      }
+    }
+
+    // Atualiza a mídia com as informações fornecidas
+    existingMedia.title = title || existingMedia.title;
+    existingMedia.username = username || existingMedia.username;
+    await this.mediaRepository.save(existingMedia);
+    // Retorna a mídia atualizada
+    return existingMedia;
   }
+
 
   // Método para remover uma mídia por ID
   remove(id: number) {

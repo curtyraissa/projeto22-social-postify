@@ -41,8 +41,18 @@ export class MediasController {
 
   // Endpoint para atualizar uma mídia por ID
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMediaDto: UpdateMediaDto) {
-    return this.mediasService.update(+id, updateMediaDto);
+  async update(@Param('id') id: string, @Body() updateMediaDto: UpdateMediaDto) {
+    try {
+      // Chama o serviço para atualizar a mídia com o ID fornecido
+      const updatedMedia = this.mediasService.update(+id, updateMediaDto);
+      return updatedMedia;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
   }
 
   // Endpoint para remover uma mídia por ID
