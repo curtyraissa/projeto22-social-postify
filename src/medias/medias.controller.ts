@@ -58,6 +58,7 @@ export class MediasController {
   // Endpoint para remover uma mídia por ID
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.mediasService.remove(+id);
-  }
+  const mediaId = +id; // Converte o parâmetro de string para número
+  this.mediasService.remove(mediaId);
+}
 }

@@ -1,6 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MediaRepository } from './medias.repository';
+//importar publicationRepository
 import { CreateMediaDto } from './dto/create-media.dto';
 import { Media } from './entities/media.entity';
 
@@ -96,7 +97,25 @@ export class MediasService {
 
 
   // Método para remover uma mídia por ID
-  remove(id: number) {
-    return `This action removes a #${id} media`;
+  async remove(id: number): Promise<void> {
+    // Busca a mídia existente com o ID fornecido
+    const existingMedia = await this.mediaRepository.findOne({
+      where: { id },
+    });
+  
+    if (!existingMedia) {
+      throw new HttpException('Media not found', HttpStatus.NOT_FOUND);
+    }
+  
+    // Verifica se a mídia está associada a alguma publicação
+    const associatedPublications = await this.publicationRepository.find({
+      where: { media: existingMedia },
+    });
+  
+    if (associatedPublications.length > 0) {
+      throw new HttpException('Cannot delete media associated with publications', HttpStatus.FORBIDDEN);
+    }
+  
+    // Remove a mídia do banco de dados
+    await this.mediaRepository.remove(existingMedia);
   }
-}
