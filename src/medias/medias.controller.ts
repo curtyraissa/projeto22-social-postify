@@ -30,8 +30,13 @@ export class MediasController {
 
   // Endpoint para buscar uma mídia por ID
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.mediasService.findOne(+id);
+  async findOne(@Param('id') id: string){
+    try {
+      const media = this.mediasService.findOne(+id);
+      return media;
+    } catch (error) {
+      throw new HttpException('Media not found', HttpStatus.NOT_FOUND);
+    }
   }
 
   // Endpoint para atualizar uma mídia por ID

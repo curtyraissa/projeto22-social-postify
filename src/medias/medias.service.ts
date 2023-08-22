@@ -43,8 +43,14 @@ export class MediasService {
   }
 
   // Método para buscar uma mídia por ID
-  findOne(id: number) {
-    return `This action returns a #${id} media`;
+  findOne(id: number): Promise<Media> {
+    const media = this.mediaRepository.findOne(id);
+
+    if (!media) {
+      throw new HttpException('Media not found', HttpStatus.NOT_FOUND);
+    }
+
+    return media;
   }
 
   // Método para atualizar uma mídia por ID
