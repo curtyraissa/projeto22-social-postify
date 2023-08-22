@@ -22,7 +22,10 @@ export class MediasController {
   // Endpoint para buscar todas as mídias
   @Get()
   findAll() {
-    return this.mediasService.findAll();
+    //Chama o servico para buscar todas as midias
+    const medias = this.mediasService.findAll();
+    
+    return medias;
   }
 
   // Endpoint para buscar uma mídia por ID

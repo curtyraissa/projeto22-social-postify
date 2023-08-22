@@ -2,6 +2,7 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MediaRepository } from './medias.repository';
 import { CreateMediaDto } from './dto/create-media.dto';
+import { Media } from './entities/media.entity';
 
 @Injectable()
 export class MediasService {
@@ -28,9 +29,17 @@ export class MediasService {
     return this.mediaRepository.createMedia(createMediaDto);
   }
 
-  // Método para buscar todas as mídias
-  findAll() {
-    return `This action returns all medias`;
+  // Método para buscar todas as mídias registradas
+  async findAll(): Promise<Media[]> {
+    // Chama o método do repositório para buscar todas as mídias
+    const medias = await this.mediaRepository.find();
+
+    // Retorna o array de mídias formatado no formato especificado
+    return medias.map(media => ({
+      id: media.id,
+      title: media.title,
+      username: media.username,
+    }));
   }
 
   // Método para buscar uma mídia por ID
