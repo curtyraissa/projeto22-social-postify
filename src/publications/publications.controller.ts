@@ -1,15 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
 import { PublicationsService } from './publications.service';
 import { CreatePublicationDto } from './dto/create-publication.dto';
-import { UpdatePublicationDto } from './dto/update-publication.dto';
 
 @Controller('publications')
 export class PublicationsController {
   constructor(private readonly publicationsService: PublicationsService) {}
 
+  // Endpoint para criar uma nova publicação
   @Post()
-  create(@Body() createPublicationDto: CreatePublicationDto) {
-    return this.publicationsService.create(createPublicationDto);
+  async create(@Body() createPublicationDto: CreatePublicationDto) {
+    // Verifica se os campos obrigatórios estão presentes no DTO
+    if (!createPublicationDto.mediaId || !createPublicationDto.postId || !createPublicationDto.date) {
+      throw new HttpException('Missing required fields', HttpStatus.BAD_REQUEST);
+    }
+
+    // Chama o serviço para criar a nova publicação e retorna o resultado
+    const result = await this.publicationsService.create(createPublicationDto);
+    return result;
   }
 
   @Get()
