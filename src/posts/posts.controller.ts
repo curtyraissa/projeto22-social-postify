@@ -1,41 +1,59 @@
-// import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
-// import { PostsService } from './posts.service';
-// import { CreatePostDto } from './dto/create-post.dto';
-// import { UpdatePostDto } from './dto/update-post.dto';
+import { Controller, Get, Post, Body, Param, Delete, HttpException, HttpStatus, Put } from '@nestjs/common';
+import { PostService } from './posts.service';
+import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
 
-// @Controller('posts')
-// export class PostsController {
-//   constructor(private readonly postsService: PostsService) {}
+@Controller('posts')
+export class PostsController {
+  constructor(private readonly postService: PostService) {}
 
-//   // Endpoint para criar um novo post
-//   @Post()
-//   async create(@Body() createPostDto: CreatePostDto) {
-//     // Verifica se os campos obrigatórios foram fornecidos
-//     if (!createPostDto.title || !createPostDto.text) {
-//       throw new HttpException('Missing required fields', HttpStatus.BAD_REQUEST);
-//     }
-    
-//     // Chama o serviço para criar o post
-//     return this.postsService.create(createPostDto);
-//   }
+  // Cria um novo post
+  @Post()
+  async create(@Body() createPostDto: CreatePostDto) {
+    if (!createPostDto.title || !createPostDto.text) {
+      throw new HttpException('Missing required fields', HttpStatus.BAD_REQUEST);
+    }
 
-//   @Get()
-//   findAll() {
-//     return this.postsService.findAll();
-//   }
+    return this.postService.create(createPostDto);
+  }
 
-//   @Get(':id')
-//   findOne(@Param('id') id: string) {
-//     return this.postsService.findOne(+id);
-//   }
+  // Retorna todos os posts
+  @Get()
+  findAll() {
+    const posts = this.postService.findAll();
+    return posts;
+  }
 
-//   // @Patch(':id')
-//   // update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-//   //   return this.postsService.update(+id, updatePostDto);
-//   // }
+  // Retorna um post pelo ID
+  @Get(':id')
+  async findOne(@Param('id') id: string){
+    try {
+      const post = await this.postService.findOne(+id);
+      return post;
+    } catch (error) {
+      throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+    }
+  }
 
-//   @Delete(':id')
-//   remove(@Param('id') id: string) {
-//     return this.postsService.remove(+id);
-//   }
-// }
+  // Atualiza um post pelo ID
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
+    try {
+      const updatedPost = await this.postService.update(+id, updatePostDto);
+      return updatedPost;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
+  }
+
+  // Remove um post pelo ID
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    const postId = +id;
+    await this.postService.remove(postId);
+  }
+}

@@ -1,45 +1,69 @@
-// import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { Post } from './entities/post.entity';
-// import { CreatePostDto } from './dto/create-post.dto';
-// import { Repository } from 'typeorm';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { PostRepository } from './posts.repository';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
+import { Post } from '@prisma/client';
 
-// @Injectable()
-// export class PostsService {
-//   constructor(
-//     @InjectRepository(Post)
-//     private postRepository: Repository<Post>,
-//   ) {}
+@Injectable()
+export class PostService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly postRepository: PostRepository,
+  ) {}
 
-//   // Função para criar um novo post
-//   async create(createPostDto: CreatePostDto): Promise<Post> {
-//     const { title, text, image } = createPostDto;
-    
-//     // Verifica se os campos obrigatórios foram fornecidos
-//     if (!title || !text) {
-//       throw new HttpException('Missing required fields', HttpStatus.BAD_REQUEST);
-//     }
+  // Cria um novo post
+  async create(createPostDto: CreatePostDto): Promise<Post> {
+    const { title, text, image } = createPostDto;
 
-//     // Cria um novo post e o salva no banco de dados
-//     const post = this.postRepository.create({ title, text, image });
-//     await this.postRepository.save(post);
+    // Validação dos campos obrigatórios
+    if (!title || !text) {
+      throw new HttpException('Title and text are required', HttpStatus.BAD_REQUEST);
+    }
 
-//     return post;
-//   }
+    return this.postRepository.createPost(createPostDto);
+  }
 
-//   findAll() {
-//     return `This action returns all posts`;
-//   }
+  // Retorna todos os posts
+  async findAll(): Promise<Post[]> {
+    return this.postRepository.findAllPosts();
+  }
 
-//   findOne(id: number) {
-//     return `This action returns a #${id} post`;
-//   }
+  // Retorna um post pelo ID
+  async findOne(id: number): Promise<Post> {
+    const post = await this.postRepository.findPostById(id);
 
-//   // update(id: number, updatePostDto: UpdatePostDto) {
-//   //   return `This action updates a #${id} post`;
-//   // }
+    if (!post) {
+      throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+    }
 
-//   remove(id: number) {
-//     return `This action removes a #${id} post`;
-//   }
-// }
+    return post;
+  }
+
+  // Atualiza um post pelo ID
+  async update(id: number, updatePostDto: UpdatePostDto): Promise<Post> {
+    const existingPost = await this.postRepository.findPostById(id);
+
+    if (!existingPost) {
+      throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Validação das mudanças
+    if (!updatePostDto.title && !updatePostDto.text && !updatePostDto.image) {
+      throw new HttpException('No changes provided', HttpStatus.BAD_REQUEST);
+    }
+
+    return this.postRepository.updatePost(existingPost, updatePostDto);
+  }
+
+  // Remove um post pelo ID
+  async remove(id: number): Promise<void> {
+    const existingPost = await this.postRepository.findPostById(id);
+
+    if (!existingPost) {
+      throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+    }
+
+    await this.postRepository.removePost(existingPost);
+  }
+}

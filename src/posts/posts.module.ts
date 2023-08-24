@@ -1,14 +1,13 @@
-// import { Module } from '@nestjs/common';
-// import { TypeOrmModule } from '@nestjs/typeorm';
-// import { PostsController } from './posts.controller';
-// import { PostsService } from './posts.service';
-// import { Post } from './entities/post.entity';
-// import { PostsRepository } from './posts.repository';
+import { Module } from '@nestjs/common';
+import { PostService } from './posts.service';
+import { PostsController } from './posts.controller';
+import { PrismaModule } from 'src/prisma/prisma.module';
+import { PostRepository } from './posts.repository';
 
-// @Module({
-//   imports: [TypeOrmModule.forFeature([Post, PostsRepository])],
-//   controllers: [PostsController],
-//   providers: [PostsService],
-// })
-// export class PostsModule {}
-
+@Module({
+  controllers: [PostsController],
+  providers: [PostService, PostRepository],
+  exports: [PostService],
+  imports: [PrismaModule],
+})
+export class PostsModule {}
