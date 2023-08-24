@@ -1,4 +1,18 @@
-// import { PartialType } from '@nestjs/mapped-types';
-// import { CreatePublicationDto } from './create-publication.dto';
+import { IsOptional, IsBoolean, IsDateString, IsNumber } from 'class-validator';
+export class UpdatePublicationDto {
+  @IsOptional()
+  @IsDateString()
+  date?: string;
 
-// export class UpdatePublicationDto extends PartialType(CreatePublicationDto) {}
+  @IsOptional()
+  @IsBoolean()
+  published?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  mediaId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  postId?: number;
+}

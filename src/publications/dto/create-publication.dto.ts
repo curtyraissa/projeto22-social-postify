@@ -1,15 +1,14 @@
-// import { IsNotEmpty, IsNumber, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsInt, IsDateString } from 'class-validator';
+export class CreatePublicationDto {
+  @IsNotEmpty()
+  @IsInt()
+  mediaId: number;
 
-// export class CreatePublicationDto {
-//   @IsNotEmpty()
-//   @IsNumber()
-//   mediaId: number;
+  @IsNotEmpty()
+  @IsInt()
+  postId: number;
 
-//   @IsNotEmpty()
-//   @IsNumber()
-//   postId: number;
-
-//   @IsNotEmpty()
-//   @IsDateString()
-//   date: string;
-// }
+  @IsNotEmpty()
+  @IsDateString()
+  date: string;
+}

@@ -1,53 +1,94 @@
-// import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { PublicationRepository } from './publications.repository';
-// import { MediasService } from '../medias/medias.service';
-// import { PostsService } from '../posts/posts.service';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { PublicationRepository } from './publications.repository';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreatePublicationDto } from './dto/create-publication.dto';
+import { UpdatePublicationDto } from './dto/update-publication.dto';
+import { Publication } from '@prisma/client';
 
-// @Injectable()
-// export class PublicationsService {
-//   constructor(
-//     @InjectRepository(PublicationRepository)
-//     private publicationRepository: PublicationRepository,
-//     private mediasService: MediasService,
-//     private postsService: PostsService,
-//   ) {}
+@Injectable()
+export class PublicationService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly publicationRepository: PublicationRepository,
+  ) {}
 
-//   async createPublication(mediaId: number, postId: number, date: Date) {
-//     const existingMedia = await this.mediasService.findOne(mediaId);
-//     const existingPost = await this.postsService.findOne(postId);
+  async create(createPublicationDto: CreatePublicationDto): Promise<Publication> {
+    const { mediaId, postId, date } = createPublicationDto;
 
-//     if (!existingMedia || !existingPost) {
-//       throw new HttpException('Media or Post not found', HttpStatus.NOT_FOUND);
-//     }
+    if (!mediaId || !postId || !date) {
+      throw new HttpException('MediaId, postId and date are required', HttpStatus.BAD_REQUEST);
+    }
 
-    // Implementar aqui a verificação se o post está associado a publicações
-    // Se estiver, lance uma ConflictException
-    // Caso contrário, crie a publicação
+    // Verificar se a mídia existe
+    const existingMedia = await this.prisma.media.findUnique({ where: { id: mediaId } });
+    if (!existingMedia) {
+      throw new HttpException('Media not found', HttpStatus.NOT_FOUND);
+    }
 
-//     const newPublication = this.publicationRepository.create({
-//       media: existingMedia,
-//       post: existingPost,
-//       date,
-//     });
+    // Verificar se o post existe
+    const existingPost = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (!existingPost) {
+      throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+    }
 
-//     return this.publicationRepository.save(newPublication);
-//   }
-// }
+    // Criar a publicação
+    return this.publicationRepository.createPublication(createPublicationDto);
+  }
 
-//   findAll() {
-//     return `This action returns all publications`;
-//   }
+  async findAll(): Promise<Publication[]> {
+    return this.publicationRepository.findAllPublications();
+  }
 
-//   findOne(id: number) {
-//     return `This action returns a #${id} publication`;
-//   }
+  async findOne(id: number): Promise<Publication> {
+    const publication = await this.publicationRepository.findPublicationById(id);
 
-//   update(id: number, updatePublicationDto: UpdatePublicationDto) {
-//     return `This action updates a #${id} publication`;
-//   }
+    if (!publication) {
+      throw new HttpException('Publication not found', HttpStatus.NOT_FOUND);
+    }
 
-//   remove(id: number) {
-//     return `This action removes a #${id} publication`;
-//   }
-// }
+    return publication;
+  }
+
+  async update(id: number, updatePublicationDto: UpdatePublicationDto): Promise<Publication> {
+    const existingPublication = await this.publicationRepository.findPublicationById(id);
+
+    if (!existingPublication) {
+      throw new HttpException('Publication not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (existingPublication.published) {
+      throw new HttpException('Published publications cannot be updated', HttpStatus.FORBIDDEN);
+    }
+
+    const { mediaId, postId } = updatePublicationDto;
+    if (mediaId) {
+      // Verificar se a mídia existe
+      const existingMedia = await this.prisma.media.findUnique({ where: { id: mediaId } });
+      if (!existingMedia) {
+        throw new HttpException('Media not found', HttpStatus.NOT_FOUND);
+      }
+    }
+
+    if (postId) {
+      // Verificar se o post existe
+      const existingPost = await this.prisma.post.findUnique({ where: { id: postId } });
+      if (!existingPost) {
+        throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+      }
+    }
+
+    // Atualizar a publicação
+    return this.publicationRepository.updatePublication(existingPublication, updatePublicationDto);
+  }
+
+  async remove(id: number): Promise<void> {
+    const existingPublication = await this.publicationRepository.findPublicationById(id);
+
+    if (!existingPublication) {
+      throw new HttpException('Publication not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Remover a publicação
+    await this.publicationRepository.removePublication(existingPublication);
+  }
+}
