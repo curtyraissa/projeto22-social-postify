@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, HttpException, HttpStatus, Put, HttpCode } from '@nestjs/common';
 import { MediasService } from './medias.service';
 import { CreateMediaDto } from './dto/create-media.dto';
 import { UpdateMediaDto } from './dto/update-media.dto';
@@ -30,9 +30,9 @@ export class MediasController {
 
   // Endpoint para buscar uma mídia por ID
   @Get(':id')
-  async findOne(@Param('id') id: string){
+  async findOne(@Param('id') id: string) {
     try {
-      const media = this.mediasService.findOne(+id);
+      const media = await this.mediasService.findOne(+id);
       return media;
     } catch (error) {
       throw new HttpException('Media not found', HttpStatus.NOT_FOUND);
@@ -40,7 +40,7 @@ export class MediasController {
   }
 
   // Endpoint para atualizar uma mídia por ID
-  @Patch(':id')
+  @Put(':id')
   async update(@Param('id') id: string, @Body() updateMediaDto: UpdateMediaDto) {
     try {
       // Chama o serviço para atualizar a mídia com o ID fornecido
@@ -57,6 +57,7 @@ export class MediasController {
 
   // Endpoint para remover uma mídia por ID
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {
   const mediaId = +id; // Converte o parâmetro de string para número
   this.mediasService.remove(mediaId);

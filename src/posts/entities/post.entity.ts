@@ -1,16 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+// import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
-export class Post {
-  @PrimaryGeneratedColumn()
-  id: number;
+// @Entity()
+// export class Post {
+//   @PrimaryGeneratedColumn()
+//   id: number;
 
-  @Column()
-  title: string;
+//   @Column()
+//   title: string;
 
-  @Column()
-  text: string;
+//   @Column()
+//   text: string;
 
-  @Column({ nullable: true })
-  image: string;
-}
+//   @Column({ nullable: true })
+//   image: string;
+// }

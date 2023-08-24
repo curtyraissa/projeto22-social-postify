@@ -1,6 +1,6 @@
-export class CreatePostDto {
-    title: string;
-    text: string;
-    image?: string;
-  }
+// export class CreatePostDto {
+//     title: string;
+//     text: string;
+//     image?: string;
+//   }
   
