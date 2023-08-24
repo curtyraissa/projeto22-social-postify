@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PublicationService } from './publications.service';
 import { PublicationController } from './publications.controller';
-import { PrismaModule } from 'src/prisma/prisma.module';
+import { PrismaModule } from '../prisma/prisma.module';
 import { PublicationRepository } from './publications.repository';
 
 @Module({
