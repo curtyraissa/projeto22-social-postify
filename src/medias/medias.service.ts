@@ -2,13 +2,12 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { MediaRepository } from './medias.repository';
 import { CreateMediaDto } from './dto/create-media.dto';
 import { UpdateMediaDto } from './dto/update-media.dto';
-import { Media } from './entities/media.entity';
 
 @Injectable()
 export class MediasService {
   constructor(private readonly mediaRepository: MediaRepository) {}
 
-  async create(createMediaDto: CreateMediaDto): Promise<Media> {
+  async create(createMediaDto: CreateMediaDto): Promise<any> {
     const { title, username } = createMediaDto;
 
     // Verificar se já existe uma mídia com o mesmo título e nome de usuário
@@ -22,7 +21,7 @@ export class MediasService {
     return this.mediaRepository.createMedia(createMediaDto);
   }
 
-  async findAll(): Promise<Media[]> {
+  async findAll(): Promise<any[]> {
     // Buscar todas as mídias utilizando o repositório
     const medias = await this.mediaRepository.findAllMedia();
 
@@ -34,7 +33,7 @@ export class MediasService {
     }));
   }
 
-  async findOne(id: number): Promise<Media> {
+  async findOne(id: number): Promise<any> {
     // Buscar uma mídia pelo ID utilizando o repositório
     const media = await this.mediaRepository.findMediaById(id);
 
@@ -46,7 +45,7 @@ export class MediasService {
     return media;
   }
 
-  async update(id: number, updateMediaDto: UpdateMediaDto): Promise<Media> {
+  async update(id: number, updateMediaDto: UpdateMediaDto): Promise<any> {
     // Verificar se a mídia com o ID fornecido existe
     const existingMedia = await this.mediaRepository.findMediaById(id);
 
@@ -55,7 +54,7 @@ export class MediasService {
     }
 
     // Atualizar a mídia utilizando o repositório
-    return this.mediaRepository.updateMedia(existingMedia, updateMediaDto);
+    return this.mediaRepository.updateMedia(id, updateMediaDto);
   }
 
   async remove(id: number): Promise<void> {
@@ -67,6 +66,6 @@ export class MediasService {
     }
 
     // Remover a mídia utilizando o repositório
-    await this.mediaRepository.removeMedia(existingMedia);
+    await this.mediaRepository.removeMedia(id);
   }
 }
