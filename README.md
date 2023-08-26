@@ -1,73 +1,260 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+<h1 align="center">Social Postify</h1>
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+✅ Requisitos
+- Geral
+    - [ ]  O projeto deve ser desenvolvido inteiramente em NestJS.
+    - [ ]  A porta utilizada pelo seu servidor deve ser a `3000` (padrão do Nest).
+    - [ ]  Versionamento usando Git é obrigatório, crie um repositório público no seu perfil do GitHub apenas com o código do back-end.
+    - [ ]  Faça commits a cada funcionalidade implementada.
+    - [ ]  Utilize o dotenv.
+    - [ ]  Utilize o Prisma para gerenciar o banco de dados e executar as queries necessárias.
+    - [ ]  É necessário implementar a camada de repository para executar o acesso ao banco, não utilize a camada de service para isso!
+    - [ ]  Divida o código em módulos (`@Modules`)! Crie um para o Prisma e para cada uma das entidades separadamente (`Posts`, `Medias` & `Publication`)
+- Rotas
+    - Health
+        - Endpoint somente para garantir que a aplicação está em pé.
+        - [ ]  **GET** `/health`: Retorna a mensagem `“I’m okay!”` com o status code `200 OK`.
+    - Medias
+        - As `medias` representam as redes sociais nas quais as publicações (`publications`) serão feitas, por exemplo: Facebook, Instagram, Twitter, LinkedIn, Threads, etc.
+        - **POST** `/medias`
+            - [ ]  Deve receber (pelo corpo da requisição), os parâmetros: `title` e `username`.
+                
+                ```
+                {
+                	"title": "Instagram",
+                	"username": "myusername",
+                }
+                ```
+                
+            - [ ]  Na ausência de campos obrigatórios, retorne o status code `400 Bad Request`.
+            - [ ]  Impeça a criação de um novo registro com a mesma combinação de `title` e `username` (caso exista, retornar status code ****`409 Conflict`).
+        - **GET** `/medias`
+            - [ ]  Deve retornar todas as mídias registradas no sistema no seguinte formato:
+            
+            ```tsx
+            [
+            	{
+            		"id": 1,
+            		"title": "Instagram",
+            		"username": "myusername", //
+            	},
+            	{
+            		"id": 2,
+            		"title": "Twitter",
+            		"username": "myusername",
+            	}
+            ]
+            ```
+            
+            - [ ]  Caso não exista nenhuma mídia cadastrada, retornar um array vazio.
+        - **GET** `/medias/:id`
+            - [ ]  Deve retornar o registro compatível com o id fornecido:
+            
+            ```tsx
+            [
+            	{
+            		"id": 1,
+            		"title": "Instagram",
+            		"username": "myusername",
+            	}
+            ]
+            ```
+            
+            - [ ]  Se não houver nenhum registro compatível, retornar status code `404 Not Found`.
+        - **PUT** `/medias/:id`
+            - [ ]  Deve atualizar o registro compatível com o id fornecido:
+            
+            ```tsx
+            [
+            	{
+            		"title": "Instagram",
+            		"username": "myusername-2",
+            	}
+            ]
+            ```
+            
+            - [ ]  Se não houver nenhum registro compatível, retornar status code `404 Not Found`.
+            - [ ]  A mudança não pode violar a regra de `title` e `username` únicos. Se isso acontecer, retorne o status code `409 Conflict`.
+        - **DELETE** `/medias/:id`
+            - [ ]  Deve deletar o registro compatível com o id fornecido.
+            - [ ]  Se não houver nenhum registro compatível, retornar status code `404 Not Found`.
+            - [ ]  A media só pode ser deletada se não estiver fazendo parte de nenhuma publicação (agendada ou publicada). Neste caso, retornar o status code `403 Forbidden`.
+    - Posts
+        - Os posts representam os conteúdos que serão postados nas redes sociais (`medias`) por meio de uma publicação (`publication`):
+        - **POST** `/posts`
+            - [ ]  Deve receber (pelo corpo da requisição), os parâmetros: `title`, `text` e `image`, sendo o último opcional.
+                
+                ```
+                {
+                	"title": "Why you should have a guinea pig?",
+                	"text": "https://www.guineapigs.com/why-you-should-guinea",
+                }
+                ```
+                
+            - [ ]  Na ausência de campos obrigatórios, retorne o status code `400 Bad Request`.
+        - **GET** `/posts`
+            - [ ]  Deve retornar todas os posts registrados no sistema no seguinte formato:
+            
+            ```tsx
+            [
+            	{
+            		"id": 1
+            		"title": "Why you should have a guinea pig?",
+            		"text": "https://www.guineapigs.com/why-you-should-guinea",
+            	},
+            	{
+            		"id": 2,
+            		"title": "Man dies after coding for 400 hours no stop",
+            		"text": "https://www.devnews.com/dies-after-400",
+            		"image": "https://www.devnews.com/dead-dev.jpg"
+            	}
+            ]
+            ```
+            
+            - [ ]  Caso não exista nenhum post cadastrado, retornar um array vazio.
+        - **GET** `/posts/:id`
+            - [ ]  Deve retornar o registro compatível com o id fornecido:
+            
+            ```tsx
+            [
+            	{
+            		"id": 1
+            		"title": "Why you should have a guinea pig?",
+            		"text": "https://www.guineapigs.com/why-you-should-guinea",
+            	},
+            ]
+            ```
+            
+            - [ ]  Se não houver nenhum registro compatível, retornar status code `404 Not Found`.
+        - **PUT**  `/posts/:id`
+            - [ ]  Deve atualizar o registro compatível com o id fornecido:
+            
+            ```tsx
+            [
+            	{
+            		"title": "Why you should't have a guinea pig?",
+            		"text": "https://www.guineapigs.com/why-you-should-guinea",
+            	},
+            ]
+            ```
+            
+            - [ ]  Se não houver nenhum registro compatível, retornar status code `404 Not Found`.
+        - **DELETE** `/posts/:id`
+            - [ ]  Deve deletar o registro compatível com o id fornecido.
+            - [ ]  Se não houver nenhum registro compatível, retornar status code `404 Not Found`.
+            - [ ]  O post só pode ser deletado se não estiver fazendo parte de nenhuma publicação (agendada ou publicada). Neste caso, retornar o status code `403 Forbidden`.
+    - Publications
+        - As publicações são os agendamentos dos `posts` nas redes sociais (`medias`).
+        - **POST** `/publications`
+            - [ ]  Deve receber (pelo corpo da requisição), os parâmetros: `mediaId`, `postId` e `date`:
+                
+                ```
+                {
+                	"mediaId": 1,
+                	"postId": 1,
+                	"date": "2023-08-21T13:25:17.352Z"
+                }
+                ```
+                
+            - [ ]  Na ausência de campos obrigatórios, retorne o status code `400 Bad Request`.
+            - [ ]  Se não existirem registros compatíveis com o `mediaId` e o `postId`, retornar o status code `404 Not Found`.
+        - **GET** `/publications`
+            - [ ]  Deve retornar todas os posts registrados no sistema no seguinte formato:
+            
+            ```tsx
+            [
+            	{
+            		"id": 1,
+            		"mediaId": 1,
+            		"postId": 1,
+            		"date": "2023-08-21T13:25:17.352Z"
+            	},
+            	{
+            		"id": 1,
+            		"mediaId": 2,
+            		"postId": 1,
+            		"date": "2023-08-21T13:25:17.352Z"
+            	},
+            ]
+            ```
+            
+            - [ ]  Caso não exista nenhuma publicação cadastrada, retornar um array vazio.
+            - Filtros especiais:
+                - [ ]  published (true/false): publicações que já foram pro ar ou não.
+                - [ ]  after (date): publicações depois de determinada data.
+        - **GET** `/publications/:id`
+            - [ ]  Deve retornar o registro compatível com o id fornecido:
+            
+            ```tsx
+            [
+            	{
+            		"id": 1,
+            		"mediaId": 1,
+            		"postId": 1,
+            		"date": "2023-08-21T13:25:17.352Z"
+            	},
+            ]
+            ```
+            
+            - [ ]  Se não houver nenhum registro compatível, retornar status code `404 Not Found`.
+        - **PUT**  `/publications/:id`
+            - [ ]  Deve atualizar o registro compatível com o id fornecido:
+            
+            ```tsx
+            [
+            	{
+            		"id": 1,
+            		"mediaId": 1,
+            		"postId": 1,
+            		"date": "2023-09-21T13:25:17.352Z"
+            	},
+            ]
+            ```
+            
+            - [ ]  Não deve ser possível alterar as informações de um registro de uma publicação que já foi publicada, somente as agendadas. Neste caso, retornar o status code `403 Forbidden`.
+            - [ ]  Se não houver nenhum registro compatível, retornar status code `404 Not Found`.
+            - [ ]  Se não existirem registros compatíveis com o `mediaId` e o `postId`, retornar o status code `404 Not Found`.
+        - **DELETE** `/publications/:id`
+            - [ ]  Deve deletar o registro compatível com o id fornecido.
+            - [ ]  Se não houver nenhum registro compatível, retornar status code `404 Not Found`.
+- Testes automatizados (integração)
+    - [ ]  Desenvolva testes de integração para cada uma das rotas determinadas (pelo menos 1 teste para cada uma).
+    - [ ]  Configure um banco de dados somente para testes.
+    - [ ]  Quando aplicável, use factories e a biblioteca faker.
 
-## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Installation
+## 🛠 &nbsp;Skills
+<div align="center">
+ <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" height="40" width="52" alt="node logo"  />
+ <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" height="40" width="52" alt="ts logo"  />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" height="40" width="52" alt="js logo"  />      
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg" height="40" width="52" alt="express logo"  />
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/npm/npm-original-wordmark.svg" height="40" width="52" alt="npm logo"  />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" height="40" width="52" alt="git logo"  />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" height="40" width="52" alt="github logo" />                                   
+</div>
+<hr/>
 
-```bash
-$ npm install
-```
+## 🚀 &nbsp;Links
 
-## Running the app
+- [Deploy]().<br/>
 
-```bash
-# development
-$ npm run start
+```zsh
+# iniciar servidor
+npm run start
 
-# watch mode
-$ npm run start:dev
+# testar
+npm run test:e2e
 
-# production mode
-$ npm run start:prod
-```
+<hr/>
 
-## Test
+## 💬 &nbsp;Contact
+<img align="left" src="https://avatars.githubusercontent.com/curtyraissa?size=100">
 
-```bash
-# unit tests
-$ npm run test
+Feito por [Raissa Curty](https://github.com/curtyraissa)!
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+<a href="https://www.linkedin.com/in/raissa-curty/" target="_blank">
+    <img style="border-radius:50%;" src="https://raw.githubusercontent.com/maurodesouza/profile-readme-generator/master/src/assets/icons/social/linkedin/default.svg" width="52" height="40" alt="linkedin logo"  />
+</a>&nbsp;
