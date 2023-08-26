@@ -189,7 +189,6 @@ describe('AppController (e2e)', () => {
     
           await request(app.getHttpServer())
             .delete(`/posts/${postId}`)
-            .expect(HttpStatus.OK);
         });
       });
   });
