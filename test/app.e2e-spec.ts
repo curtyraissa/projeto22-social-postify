@@ -4,28 +4,27 @@ import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { PrismaModule } from '../src/prisma/prisma.module';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { faker } from '@faker-js/faker';
+import { Helper } from './helpers';
+import { Factories } from './factory';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
+  let helper: Helper;
+  let factories: Factories;
 
-  //criando um modulo de teste a partir do modulo principal, AppModule
-  //criando a aplicacao Nest a partir deste modulo de testes! o app
-  //chamando a funcao init() que sobe a aplicacao nest para que eu possa testa-la
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule, PrismaModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe()); // validacao com os dtos a partir do class-validator
-    prisma = app.get(PrismaService);
-
-  // await prisma.media.deleteMany();
-  // await prisma.post.deleteMany();
-  // await prisma.publication.deleteMany();
-
+    app.useGlobalPipes(new ValidationPipe());
     await app.init();
+    prisma = moduleFixture.get<PrismaService>(PrismaService);
+    factories = new Factories();
+    helper = new Helper();
   });
 
   it('/health (GET)', () => {
@@ -33,5 +32,21 @@ describe('AppController (e2e)', () => {
       .get('/health')
       .expect(HttpStatus.OK)
       .expect("I'm okay!");
+  });
+  
+  describe('MediaController', () => {
+    // test cases
+  });
+  
+  describe('PostController', () => {
+    //  test cases
+  });
+  
+  describe('PublicationController', () => {
+    //  test cases
+  });
+
+  afterAll(async () => {
+    await app.close();
   });
 });
