@@ -4,12 +4,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from '@prisma/client';
+import { PublicationService } from '../publications/publications.service';
+
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly postRepository: PostRepository,
+    private readonly publicationService: PublicationService
   ) {}
 
   // Cria um novo post
@@ -57,13 +60,21 @@ export class PostService {
   }
 
   // Remove um post pelo ID
+  
   async remove(id: number): Promise<void> {
     const existingPost = await this.postRepository.findPostById(id);
-
+  
     if (!existingPost) {
       throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
     }
+    const postAlreadyPublished = await this.publicationService.findAll();
 
+    const publishedOrScheduled = postAlreadyPublished.find(i => i.postId === id);
+
+    if (publishedOrScheduled) {
+      throw new HttpException('Cannot delete post associated with publications', HttpStatus.FORBIDDEN);
+        }
+  
     await this.postRepository.removePost(existingPost);
   }
 }
