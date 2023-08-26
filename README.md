@@ -247,6 +247,7 @@ npm run start
 
 # testar
 npm run test:e2e
+```
 
 <hr/>
 
