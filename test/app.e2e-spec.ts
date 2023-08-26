@@ -6,13 +6,11 @@ import { PrismaModule } from '../src/prisma/prisma.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { faker } from '@faker-js/faker';
 import { Helper } from './helpers';
-import { Factories } from './factory';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let helper: Helper;
-  let factories: Factories;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -23,7 +21,6 @@ describe('AppController (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
     prisma = moduleFixture.get<PrismaService>(PrismaService);
-    factories = new Factories();
     helper = new Helper();
   });
 
@@ -198,11 +195,106 @@ describe('AppController (e2e)', () => {
   });
   
   describe('Publication', () => {
-    //  test cases
-  });
+    let app: INestApplication;
+    let prismaService: PrismaService;
+  
+    beforeAll(async () => {
+      const moduleFixture: TestingModule = await Test.createTestingModule({
+        imports: [AppModule],
+      }).compile();
+  
+      app = moduleFixture.createNestApplication();
+      prismaService = moduleFixture.get<PrismaService>(PrismaService);
+  
+      await app.init();
+    });
+  
+    afterAll(async () => {
+      await app.close();
+    });
+  
+    describe('POST /publications', () => {
+      it('should return 400 Bad Request if required fields are missing', async () => {
+        const response = await request(app.getHttpServer())
+          .post('/publications')
+          .send({})
+          .expect(HttpStatus.BAD_REQUEST);
+  
+        expect(response.body.message).toEqual('Missing required fields');
+      });
+  
+      it('should return 404 Not Found if mediaId or postId does not exist', async () => {
+        const response = await request(app.getHttpServer())
+          .post('/publications')
+          .send({ mediaId: 999, postId: 999, date: '2023-08-21T13:25:17.352Z' })
+          .expect(HttpStatus.NOT_FOUND);
+  
+        expect(response.body.message).toEqual('Media not found');
+      });
+    });
+    describe('GET /publications', () => {
+      it('should return all publications', async () => {
+        const response = await request(app.getHttpServer())
+          .get('/publications')
+          .expect(HttpStatus.OK);
+  
+        expect(response.body).toBeDefined();
+        expect(Array.isArray(response.body)).toBeTruthy();
+      });
+    });
+  
+    describe('GET /publications/:id', () => {
+      it('should return a publication by ID', async () => {
+        const publication = await prismaService.publication.findFirst();
+        const response = await request(app.getHttpServer())
+          .get(`/publications/${publication.id}`)
+          .expect(HttpStatus.OK);
+  
+        expect(response.body).toBeDefined();
+        expect(response.body.id).toEqual(publication.id);
+      });
+  
+      it('should return 404 Not Found if publication does not exist', async () => {
+        const response = await request(app.getHttpServer())
+          .get('/publications/999')
+          .expect(HttpStatus.NOT_FOUND);
+  
+        expect(response.body.message).toEqual('Publication not found');
+      });
+    });
+    describe('PUT /publications/:id', () => {
+      it('should update a scheduled publication', async () => {
+        const publication = await prismaService.publication.findFirst({ where: { published: false } });
+        const updatedDate = '2023-09-21T13:25:17.352Z';
+  
+        const response = await request(app.getHttpServer())
+          .put(`/publications/${publication.id}`)
+          .send({ date: updatedDate })
+          .expect(HttpStatus.OK);
+  
+        expect(response.body).toBeDefined();
+        expect(response.body.date).toEqual(updatedDate);
+      });
+  
+      it('should return 404 Not Found if publication does not exist', async () => {
+        const response = await request(app.getHttpServer())
+          .put('/publications/999')
+          .send({ date: '2023-09-21T13:25:17.352Z' })
+          .expect(HttpStatus.NOT_FOUND);
+  
+        expect(response.body.message).toEqual('Publication not found');
+      });
+    });
+    describe('DELETE /publications/:id', () => {
+      it('should delete a publication', async () => {
+        const publication = await prismaService.publication.findFirst();
+        await request(app.getHttpServer())
+      });
+    });
+    });
 
   afterAll(async () => {
     await app.close();
   });
 });
-});
+  });
